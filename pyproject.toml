@@ -1,0 +1,116 @@
+[project]
+name = "doclayout-yolo-icraft"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = "==3.8.*"
+dependencies = [
+    "dill>=0.4.0",
+    "doclayout-yolo==0.0.4",
+    "httpx>=0.28.1",
+    "huggingface-hub>=0.35.3",
+    "icraft==3.7.1",
+    "numpy>=1.24.4",
+    "opencv-python>=4.12.0.88",
+    "pandas",
+    "pymupdf>=1.24.11",
+    "torch==2.0.1",
+    "torchvision==0.15.2",
+    "triton==2.0.0; sys_platform == 'linux'",
+]
+
+
+[dependency-groups]
+dev = ["pandas-stubs", "ruff==0.13.3", "ty==0.0.1a21"]
+
+[tool.uv]
+managed = true
+no-sources = false
+package = false
+index-strategy = "unsafe-best-match"
+environments = ["sys_platform == 'win32' and platform_machine == 'AMD64'"]
+override-dependencies = [
+    "debugpy; sys_platform == 'never'",                # For VSCode "no-config debugging"
+    "opencv-python-headless; sys_platform == 'never'", # Conflicts with opencv-python
+]
+
+[[tool.uv.index]]
+name = "pypi"
+url = "https://pypi.tuna.tsinghua.edu.cn/simple"
+
+[[tool.uv.index]]
+name = "torch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true
+
+[[tool.uv.index]]
+name = "torch-cu118"
+url = "https://download.pytorch.org/whl/cu118"
+explicit = true
+
+[tool.uv.sources]
+icraft = { path = "C:/Icraft/icraft-3.7.1-cp38-none-win_amd64.whl" }
+torch = { index = "torch-cpu" }
+torchvision = { index = "torch-cpu" }
+triton = { index = "torch-cpu" }
+
+[tool.ruff]
+line-length = 120
+indent-width = 4
+extend-exclude = ["*.pyi", "**/Deps/*"]
+preview = true
+
+[tool.ruff.lint]
+select = [
+    # pycodestyle
+    "E",
+    # Pyflakes
+    "F",
+    # flake8-bugbear
+    "B",
+    # flake8-future-annotations
+    "FA",
+    # flake8-simplify
+    "SIM",
+    # flake8-use-pathlib
+    "PTH",
+    # flake8-type-checking
+    "TC",
+    # isort
+    "I",
+    # pyupgrade
+    "UP",
+    # ruff
+    "RUF",
+    # Perflint
+    "PERF",
+]
+ignore = [
+    "E111",
+    "E114",
+    "E117",
+    "E501",
+    "E741",
+    "W191",
+    "SIM300",
+    "RUF001",
+    "RUF002",
+    "RUF003",
+    "RUF012",
+    "TC006",
+]
+future-annotations = true
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["E402"]
+
+[tool.ruff.lint.isort]
+extra-standard-library = ["typing_extensions"]
+
+[tool.ruff.lint.flake8-type-checking]
+exempt-modules = ["typing", "typing_extensions", "collections.abc", "pathlib"]
+runtime-evaluated-base-classes = ["pydantic.BaseModel"]
+runtime-evaluated-decorators = ["pydantic.validate_call", "attrs.define"]
+
+[tool.ty.src]
+exclude = ["**/Deps/*"]

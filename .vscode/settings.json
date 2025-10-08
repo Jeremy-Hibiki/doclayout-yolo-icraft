@@ -1,0 +1,17 @@
+{
+  "clangd.arguments": [
+    "--header-insertion-decorators",
+    "--all-scopes-completion",
+    "--completion-style=detailed",
+    "--query-driver=C:/Program Files (x86)/Microsoft Visual Studio/2022/*/VC/Tools/MSVC/*/bin/Hostx64/x64/cl.exe",
+    "--compile-commands-dir=build"
+  ],
+  "clangd.fallbackFlags": [
+    "-std=c++17",
+    "-IC:\\Icraft\\CLI\\include",
+    "-IP:\\icraft-tutorial\\examples\\Deps\\thirdparty\\include\\Eigen-3.4.0",
+    "-IP:\\icraft-tutorial\\examples\\Deps\\thirdparty\\include",
+    "-IP:\\icraft-tutorial\\examples\\Deps\\modelzoo"
+  ],
+  "cmake.ignoreCMakeListsMissing": true
+}

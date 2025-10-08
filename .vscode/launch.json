@@ -1,0 +1,42 @@
+{
+  // 使用 IntelliSense 了解相关属性。
+  // 悬停以查看现有属性的描述。
+  // 欲了解更多信息，请访问: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "0_infer",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "0_infer.py",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}/1_scripts/",
+      "args": ["--weights", "../doclayout_yolo_docstructbench_imgsz1280_2501.pt", "--source", "./imgs/page_4.png"]
+    },
+    {
+      "name": "2_save_infer",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "2_save_infer.py",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}/1_scripts/",
+      "args": [
+        "--model",
+        "../2_compile/fmodel/doclayout_yolo_docstructbench_imgsz1280_2501.pt",
+        "--source",
+        "./imgs/page_4.png",
+        "--imgsz",
+        "1280"
+      ]
+    },
+    {
+      "name": "3_sim_infer",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "3_sim_infer.py",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}/1_scripts/",
+      "args": []
+    }
+  ]
+}
