@@ -29,7 +29,7 @@ def new_predict_once(self: BaseModel, x, profile=False, visualize=False, embed=N
     return x
 
 
-# BaseModel._predict_once = new_predict_once
+BaseModel._predict_once = new_predict_once
 
 
 def new_Detect_forward(self: v10Detect, x):
@@ -50,7 +50,7 @@ def new_export_torchscript(self, prefix=colorstr("TorchScript:")):
 
     LOGGER.info(f"\n{prefix} starting export with torch {torch.__version__}...")
     trace_path = TRACE_PATH  # traced path
-    im = torch.zeros(1, 3, *self.imgsz, dtype=torch.float32)  # dummy input size
+    im = torch.zeros(1, 3, 1280, 992, dtype=torch.float32)  # dummy input size
     ts = torch.jit.trace(self.model, im, strict=False)
     extra_files = {"config.txt": json.dumps(self.metadata)}  # torch._C.ExtraFilesMap()
     if self.args.optimize:  # https://pytorch.org/tutorials/recipes/mobile_interpreter.html
@@ -70,7 +70,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--weights",
         type=str,
-        default=(Path(__file__).parent / "../doclayout_yolo_docstructbench_imgsz1280_2501.pt").resolve().as_posix(),
+        default=(Path(__file__).parent / "../doclayout_yolo_docstructbench_imgsz1280_2501.onnx").resolve().as_posix(),
         help="model path(s) for inference.",
     )
     parser.add_argument(
@@ -88,5 +88,5 @@ if __name__ == "__main__":
     model = YOLOv10(weights)
 
     # export traced model
-    success = model.export(nms=True)
+    success = model.export()
     print("Model save at:", success)

@@ -13,8 +13,8 @@ from visualize import DOCLAYOUT_CLASSES, vis
 
 # ---------------------------------参数设置---------------------------------
 # 路径设置
-GENERATED_JSON_FILE = "../3_deploy/modelzoo/yolov10/imodel/8/doclayout_yolo_quantized.json"
-GENERATED_RAW_FILE = "../3_deploy/modelzoo/yolov10/imodel/8/doclayout_yolo_quantized.raw"
+GENERATED_JSON_FILE = "../3_deploy/modelzoo/yolov10/imodel/8/doclayout_yolo_parsed.json"
+GENERATED_RAW_FILE = "../3_deploy/modelzoo/yolov10/imodel/8/doclayout_yolo_parsed.raw"
 IMG_PATH = "./imgs/page_4.png"
 
 conf_thres = 0.75
@@ -24,9 +24,8 @@ nc = len(DOCLAYOUT_CLASSES)
 
 # 加载测试图像并转成icraft.Tensor
 img_raw = cv2.imread(IMG_PATH)
-# 改成 auto = False这样所有的输入 就是640,640
-img_resize = LetterBox((1280, 1280), stride=32, auto=True)(image=img_raw)
-im = img_resize[:, :, ::-1].copy()  # BGR to RGB
+img_raw = cv2.cvtColor(img_raw, cv2.COLOR_BGR2RGB)
+im = LetterBox((1280, 992), stride=32, auto=False)(image=img_raw)
 # Img to xir.Tensor
 img_ = np.expand_dims(im, axis=0)
 print("img_ =", img_.shape)
@@ -48,20 +47,19 @@ generated_output = session.forward([input_tensor])
 # i = 4  out = (1, 20, 20, 80)
 # i = 5  out = (1, 20, 20, 64)
 # check outputs
-for i in range(6):
-    out = np.array(generated_output[i])
-    print(out.shape)
+# for i in range(6):
+#     out = np.array(generated_output[i])
+#     print(out.shape)
 print("INFO: get forward results!")
 # 组装成检测结果
-outputs = []
-for i in range(3):
-    temp1 = np.array(generated_output[2 * i])
-    temp2 = np.array(generated_output[2 * i + 1])
-    # out = np.concatenate((temp1,temp2),axis=3)
-    out = np.concatenate((temp2, temp1), axis=3)  # 这里改了！！！！先64再80
-    outputs.append(torch.tensor(out.transpose((0, 3, 1, 2))))
-# for out in outputs:
-#     print(out.shape)
+output_tensors = [torch.from_numpy(np.array(obj)).permute(0, 3, 1, 2).contiguous() for obj in generated_output]
+for out in output_tensors:
+    print(out.shape, out.min(), out.max(), out.mean())
+
+outputs_n1 = torch.cat((output_tensors[0], output_tensors[1]), 1)  # [1, 14, 160, 160]
+outputs_n2 = torch.cat((output_tensors[2], output_tensors[3]), 1)  # [1, 14, 80, 80]
+outputs_n3 = torch.cat((output_tensors[4], output_tensors[5]), 1)  # [1, 14, 40, 40]
+outputs = [outputs_n1, outputs_n2, outputs_n3]
 print("*" * 80)
 # postprocess - dfl+sigmod
 shape = outputs[0].shape  # BCHW

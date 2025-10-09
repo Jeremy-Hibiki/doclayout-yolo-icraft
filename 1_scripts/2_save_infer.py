@@ -37,7 +37,7 @@ def pred_one_image(img_path, model_path, test_size):
     model = torch.jit.load(model_path)
     output = model(im)
     for out in output:
-        print(out.shape)
+        print(out.shape, out.min(), out.max(), out.mean())
     print("*" * 80)
     # 结果重组
     outputs_n1 = torch.cat((output[0], output[1]), 1)  # [1, 14, 160, 160]

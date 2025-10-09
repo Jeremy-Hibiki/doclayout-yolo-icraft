@@ -11,6 +11,7 @@ dependencies = [
     "huggingface-hub>=0.35.3",
     "icraft==3.7.1",
     "numpy>=1.24.4",
+    "onnx>=1.17.0",
     "opencv-python>=4.12.0.88",
     "pandas",
     "pymupdf>=1.24.11",
