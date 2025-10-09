@@ -5,21 +5,21 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "0_infer",
+      "name": "doclayout 0_infer",
       "type": "debugpy",
       "request": "launch",
       "program": "0_infer.py",
       "console": "integratedTerminal",
-      "cwd": "${workspaceFolder}/1_scripts/",
+      "cwd": "${workspaceFolder}/doclayout_2501/1_scripts/",
       "args": ["--weights", "../doclayout_yolo_docstructbench_imgsz1280_2501.pt", "--source", "./imgs/page_4.png"]
     },
     {
-      "name": "2_save_infer",
+      "name": "doclayout 2_save_infer",
       "type": "debugpy",
       "request": "launch",
       "program": "2_save_infer.py",
       "console": "integratedTerminal",
-      "cwd": "${workspaceFolder}/1_scripts/",
+      "cwd": "${workspaceFolder}/doclayout_2501/1_scripts/",
       "args": [
         "--model",
         "../2_compile/fmodel/doclayout_yolo_docstructbench_imgsz1280_2501.pt",
@@ -30,12 +30,12 @@
       ]
     },
     {
-      "name": "3_sim_infer",
+      "name": "doclayout 3_sim_infer",
       "type": "debugpy",
       "request": "launch",
       "program": "3_sim_infer.py",
       "console": "integratedTerminal",
-      "cwd": "${workspaceFolder}/1_scripts/",
+      "cwd": "${workspaceFolder}/doclayout_2501/1_scripts/",
       "args": []
     }
   ]

@@ -1,4 +1,8 @@
-[submodule "3_deploy/Deps/modelzoo"]
-	path = 3_deploy/Deps/modelzoo
+[submodule "doclayout_2501/3_deploy/Deps/modelzoo"]
+	path = doclayout_2501/3_deploy/Deps/modelzoo
+	url = https://gitee.com/mxh-spiger/modelzoo_utils.git
+	branch = mzu_3.7.0
+[submodule "yolov10/3_deploy/Deps/modelzoo"]
+	path = yolov10/3_deploy/Deps/modelzoo
 	url = https://gitee.com/mxh-spiger/modelzoo_utils.git
 	branch = mzu_3.7.0

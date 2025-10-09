@@ -46,4 +46,3 @@ if [ "$1" = "-d" ]; then
     wget --retry-connrefused --waitretry=1 --read-timeout=20 --timeout=15 -t 0 -np -nH -c --reject="index.html*" --user $name --password $key -P './' -r $url_deps --cut-dirs=$level  --level=10
 
 fi
-
