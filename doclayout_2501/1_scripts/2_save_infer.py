@@ -50,8 +50,7 @@ def pred_one_image(img_path, model_path, test_size):
 
     dfl_layer = DFL(reg_max) if reg_max > 1 else nn.Identity()
     anchors, strides = (
-        x.transpose(0, 1)
-        for x in make_anchors(outputs, torch.from_numpy(np.array([8, 16, 32], dtype=np.float32)), 0.5)
+        x.transpose(0, 1) for x in make_anchors(outputs, torch.from_numpy(np.array([8, 16, 32], dtype=np.float32)), 0.5)
     )
 
     dbox = dist2bbox(dfl_layer(box), anchors.unsqueeze(0), xywh=True, dim=1) * strides

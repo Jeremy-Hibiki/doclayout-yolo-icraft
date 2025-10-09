@@ -13,5 +13,7 @@
     "-IP:\\icraft-tutorial\\examples\\Deps\\thirdparty\\include",
     "-IP:\\icraft-tutorial\\examples\\Deps\\modelzoo"
   ],
-  "cmake.ignoreCMakeListsMissing": true
+  "cmake.ignoreCMakeListsMissing": true,
+  "python.terminal.activateEnvInCurrentTerminal": true,
+  "python.terminal.activateEnvironment": true
 }
