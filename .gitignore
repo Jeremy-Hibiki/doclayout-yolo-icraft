@@ -1,5 +1,8 @@
 **/Deps/*
 
+**/build_arm/**/Release
+**/build_win/**/Release
+
 .obsidian
 
 .icraft

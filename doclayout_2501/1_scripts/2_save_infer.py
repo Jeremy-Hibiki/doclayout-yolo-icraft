@@ -24,7 +24,7 @@ def pred_one_image(img_path, model_path, test_size):
 
     img_raw = cv2.imread(img_path)
     # 前处理
-    letterbox = LetterBox(test_size, auto=True, stride=32)
+    letterbox = LetterBox(test_size, auto=False, stride=32)
     im = np.stack([letterbox(image=x) for x in [img_raw]])
     print("******im =", im.shape)
 
@@ -98,7 +98,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--source",
         type=str,
-        default=(pathlib.Path(__file__).parent / "../2_compile/qtset/pdf_imgs/page_6.png").resolve().as_posix(),
+        default=(pathlib.Path(__file__).parent / "../2_compile/qtset/pdf_imgs/page_4.png").resolve().as_posix(),
         help="image path",
     )
     parser.add_argument("--imgsz", nargs="+", type=int, default=[1280], help="image size")

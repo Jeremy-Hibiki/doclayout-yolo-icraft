@@ -1,15 +1,8 @@
 page_1.png
-page_2.png
 page_3.png
-page_4.png
 page_5.png
-page_6.png
 page_7.png
-page_8.png
 page_9.png
-page_10.png
 page_11.png
-page_12.png
 page_13.png
-page_14.png
 page_15.png

@@ -1,9 +1,9 @@
 [DetPost]
-forward_dll ="C:/Icraft/CLI/bin/customop.DetPost.dll"
+forward_dll = "C:/Icraft/CustomOp_v3.7.1/customop.DetPost.dll"
 forward_so = ""
 quantized = true
-thr_f = 0.001 # 阈值 测精度时改为0.001
-cmp_en = 1  # 是否做阈值比较
+thr_f = 0.001                                                  # 阈值 测精度时改为0.001
+cmp_en = 1                                                     # 是否做阈值比较
 
 #要改
 groups = 3
@@ -12,7 +12,7 @@ position = -1
 
 
 [ImageMake]
-forward_dll = "C:/Icraft/CLI/bin/customop.ImageMake.dll"
+forward_dll = "C:/Icraft/CustomOp_v3.7.1/customop.ImageMake.dll"
 forward_so = ""
 no_imkpad = 1
 #mode = 1

@@ -2,7 +2,7 @@
 net_name = "doclayout_yolo"
 framework = "pytorch"
 frame_version = "1.9"
-inputs = [1, 1280, 992, 3]
+inputs = [1, 1280, 1280, 3]
 inputs_layout = "NHWC"
 pre_method = "resize"
 pre_scale = [255.0, 255.0, 255.0]

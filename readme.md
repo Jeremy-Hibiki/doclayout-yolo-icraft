@@ -33,19 +33,3 @@ icraft compile ./config/yolov10n_8.toml
 cd ../1_scripts
 python ./3_sim_infer.py
 ```
-
-TODO:
-
-Failed with:
-
-```
-❯ python .\3_sim_infer.py
-[W C:\t\torch\csrc\jit\codegen\cuda\interface.cpp:47] Warning: Loading nvfuser library failed with: error in LoadLibrary for nvfuser_codegen_ic.dll. WinError 126: The specified module could not be found.
- (function LoadingNvfuserLibrary)
-img_ = (1, 1280, 992, 3)
-INFO: Create network!
-Traceback (most recent call last):
-  File ".\3_sim_infer.py", line 41, in <module>
-    generated_output = session.forward([input_tensor])
-RuntimeError: shape '[1, 1280, 1280, 3]' is invalid for input of size 3809280
-```
