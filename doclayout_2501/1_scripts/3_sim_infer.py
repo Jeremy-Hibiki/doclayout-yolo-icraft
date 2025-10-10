@@ -13,11 +13,11 @@ from visualize import DOCLAYOUT_CLASSES, vis
 
 # ---------------------------------参数设置---------------------------------
 # 路径设置
-GENERATED_JSON_FILE = "../3_deploy/modelzoo/yolov10/imodel/8/doclayout_yolo_parsed.json"
-GENERATED_RAW_FILE = "../3_deploy/modelzoo/yolov10/imodel/8/doclayout_yolo_parsed.raw"
+GENERATED_JSON_FILE = "../3_deploy/modelzoo/yolov10/imodel/8/doclayout_yolo_optimized.json"
+GENERATED_RAW_FILE = "../3_deploy/modelzoo/yolov10/imodel/8/doclayout_yolo_optimized.raw"
 IMG_PATH = "./imgs/page_4.png"
 
-conf_thres = 0.5
+conf_thres = 0.25
 max_det = 300
 reg_max = 1
 nc = len(DOCLAYOUT_CLASSES)

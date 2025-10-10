@@ -13,7 +13,7 @@ from doclayout_yolo.utils import ops
 from doclayout_yolo.utils.tal import dist2bbox, make_anchors
 from visualize import DOCLAYOUT_CLASSES, vis
 
-conf_thres = 0.75
+conf_thres = 0.25
 max_det = 300
 reg_max = 1
 nc = len(DOCLAYOUT_CLASSES)
@@ -50,7 +50,8 @@ def pred_one_image(img_path, model_path, test_size):
 
     dfl_layer = DFL(reg_max) if reg_max > 1 else nn.Identity()
     anchors, strides = (
-        x.transpose(0, 1) for x in make_anchors(outputs, torch.from_numpy(np.array([8, 16, 32], dtype=np.float32)), 0.5)
+        x.transpose(0, 1)
+        for x in make_anchors(outputs, torch.from_numpy(np.array([8, 16, 32], dtype=np.float32)), 0.5)
     )
 
     dbox = dist2bbox(dfl_layer(box), anchors.unsqueeze(0), xywh=True, dim=1) * strides
@@ -97,7 +98,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--source",
         type=str,
-        default=(pathlib.Path(__file__).parent / "../2_compile/qtset/pdf_imgs/page_4.png").resolve().as_posix(),
+        default=(pathlib.Path(__file__).parent / "../2_compile/qtset/pdf_imgs/page_6.png").resolve().as_posix(),
         help="image path",
     )
     parser.add_argument("--imgsz", nargs="+", type=int, default=[1280], help="image size")

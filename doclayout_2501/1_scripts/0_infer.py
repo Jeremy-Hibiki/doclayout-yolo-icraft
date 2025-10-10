@@ -49,7 +49,7 @@ if __name__ == "__main__":
         type=str,
         help="the source path, e.g. image-file.",
     )
-    parser.add_argument("--res", type=str, default="predict.jpg", help="the res path.")
+    parser.add_argument("--res", type=str, default="predict.png", help="the res path.")
     args = parser.parse_args()
     weights = args.weights  # 权重
     img_path = args.source  # 推理图片
@@ -60,21 +60,8 @@ if __name__ == "__main__":
     img = cv2.imread(img_path)
     assert img is not None, "Image Not Found " + img_path
     # get pred res
-    output = model(source=img)
-    results = output[0]
-    names = results.names
-    boxes = results.boxes.data.tolist()
-    # visualize results
-    for obj in boxes:
-        left, top, right, bottom = int(obj[0]), int(obj[1]), int(obj[2]), int(obj[3])
-        confidence = obj[4]
-        label = int(obj[5])
-        color = random_color(label)
-        cv2.rectangle(img, (left, top), (right, bottom), color=color, thickness=2, lineType=cv2.LINE_AA)
-        caption = f"{names[label]} {confidence:.2f}"
-        w, h = cv2.getTextSize(caption, 0, 0.75, 1)[0]
-        cv2.rectangle(img, (left - 3, top - 33), (left + w + 10, top), color, -1)
-        cv2.putText(img, caption, (left, top - 5), 0, 0.75, (0, 0, 0), 1, 16)
+    det_res = model.predict(source=img)
+    annotated_frame = det_res[0].plot(pil=True, line_width=2, font_size=24)
     # save res
-    cv2.imwrite(res_path, img)
+    cv2.imwrite(res_path, annotated_frame)
     print("save at ", res_path)
