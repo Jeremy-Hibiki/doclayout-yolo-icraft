@@ -71,6 +71,15 @@ def pred_one_image(img_path, model_path, test_size):
 
     # rescale coords to img_raw size
     pred[:, :4] = ops.scale_boxes(im.shape[2:], pred[:, :4], img_raw.shape)
+    for res in pred:
+        x0 = int(res[0])
+        y0 = int(res[1])
+        x1 = int(res[2])
+        y1 = int(res[3])
+        score = res[4]
+        cls = int(res[5])
+        label = DOCLAYOUT_CLASSES[cls]
+        print(f"{label}: {score * 100:.2f}%  ({x0}, {y0}), ({x1}, {y1})")
     # show results
     result_image = vis(
         img_raw,
@@ -101,7 +110,7 @@ if __name__ == "__main__":
         default=(pathlib.Path(__file__).parent / "../2_compile/qtset/pdf_imgs/page_4.png").resolve().as_posix(),
         help="image path",
     )
-    parser.add_argument("--imgsz", nargs="+", type=int, default=[1280], help="image size")
+    parser.add_argument("--imgsz", nargs="+", type=int, default=[1280, 960], help="image size")
     opt = parser.parse_args()
 
     opt.imgsz *= 2 if len(opt.imgsz) == 1 else 1

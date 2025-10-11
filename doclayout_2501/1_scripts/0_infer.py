@@ -1,9 +1,15 @@
 # 通过 opencv 读取了一张图像，并送入模型中推理得到输出 results，
 # results 中保存着不同任务的结果，我们这里是检测任务，因此只需要拿到对应的 boxes 即可
+
+
+from __future__ import annotations
+
 import argparse
 
 import cv2
 from doclayout_yolo import YOLOv10
+from doclayout_yolo.data.augment import LetterBox
+from doclayout_yolo.engine.results import Results
 
 
 def hsv2bgr(h, s, v):
@@ -60,8 +66,28 @@ if __name__ == "__main__":
     img = cv2.imread(img_path)
     assert img is not None, "Image Not Found " + img_path
     # get pred res
-    det_res = model.predict(source=img)
+    letterbox = LetterBox((1280, 960), auto=False, stride=32)
+    im = letterbox(image=img)
+    det_res: list[Results] = model.predict(source=im)
     annotated_frame = det_res[0].plot(pil=True, line_width=2, font_size=24)
+    pred_boxes, pred_masks, pred_probs = det_res[0].boxes, det_res[0].masks, det_res[0].probs
+    names = det_res[0].names
+    for d in pred_boxes:
+        c, conf = int(d.cls), float(d.conf) * 100
+        name = names[c]
+        gain = min(im.shape[0] / img.shape[0], im.shape[1] / img.shape[1])
+        pad = (
+            round((im.shape[1] - img.shape[1] * gain) / 2 - 0.1),
+            round((im.shape[0] - img.shape[0] * gain) / 2 - 0.1),
+        )  # wh padding
+        box = d.xyxy.squeeze().numpy()
+        box[0] -= pad[0]  # x padding
+        box[1] -= pad[1]  # y padding
+        box[2] -= pad[0]  # x padding
+        box[3] -= pad[1]  # y padding
+        box /= gain
+        print(f"{name}: {conf:.2f}% ({int(box[0])}, {int(box[1])}), ({int(box[2])}, {int(box[3])})")
+    print(f"Detect {len(pred_boxes)} objects!")
     # save res
     cv2.imwrite(res_path, annotated_frame)
     print("save at ", res_path)
