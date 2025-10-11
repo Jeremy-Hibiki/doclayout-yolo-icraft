@@ -50,7 +50,7 @@ def new_export_torchscript(self, prefix=colorstr("TorchScript:")):
 
     LOGGER.info(f"\n{prefix} starting export with torch {torch.__version__}...")
     trace_path = TRACE_PATH  # traced path
-    im = torch.zeros(1, 3, 1280, 1280, dtype=torch.float32)  # dummy input size
+    im = torch.zeros(1, 3, 1280, 960, dtype=torch.float32)  # dummy input size
     ts = torch.jit.trace(self.model, im, strict=False)
     extra_files = {"config.txt": json.dumps(self.metadata)}  # torch._C.ExtraFilesMap()
     if self.args.optimize:  # https://pytorch.org/tutorials/recipes/mobile_interpreter.html

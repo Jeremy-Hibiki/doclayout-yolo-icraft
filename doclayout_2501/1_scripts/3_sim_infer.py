@@ -13,8 +13,8 @@ from visualize import DOCLAYOUT_CLASSES, vis
 
 # ---------------------------------参数设置---------------------------------
 # 路径设置
-GENERATED_JSON_FILE = "../3_deploy/modelzoo/yolov10/imodel/8/doclayout_yolo_quantized.json"
-GENERATED_RAW_FILE = "../3_deploy/modelzoo/yolov10/imodel/8/doclayout_yolo_quantized.raw"
+GENERATED_JSON_FILE = "../3_deploy/modelzoo/yolov10/imodel/8/doclayout_yolo_parsed.json"
+GENERATED_RAW_FILE = "../3_deploy/modelzoo/yolov10/imodel/8/doclayout_yolo_parsed.raw"
 IMG_PATH = "./imgs/page_4.png"
 
 conf_thres = 0.25
@@ -25,7 +25,7 @@ nc = len(DOCLAYOUT_CLASSES)
 # 加载测试图像并转成icraft.Tensor
 img_raw = cv2.imread(IMG_PATH)
 img_raw = cv2.cvtColor(img_raw, cv2.COLOR_BGR2RGB)
-im = LetterBox((1280, 1280), stride=32, auto=False)(image=img_raw)
+im = LetterBox((1280, 960), stride=32, auto=False)(image=img_raw)
 # Img to xir.Tensor
 img_ = np.expand_dims(im, axis=0)
 print("img_ =", img_.shape)
