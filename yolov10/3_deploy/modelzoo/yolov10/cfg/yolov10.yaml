@@ -1,11 +1,10 @@
-
-  # "p": "parsed",
-  # "o": "optimized",
-  # "q": "quantized",
-  # "a": "adapted",
-  # "g": "BY",
-imodel: 
-  cudamode: false  
+# "p": "parsed",
+# "o": "optimized",
+# "q": "quantized",
+# "a": "adapted",
+# "g": "BY",
+imodel:
+  cudamode: false
   mmu: true
   speedmode: false
   compressFtmp: false
@@ -15,10 +14,10 @@ imodel:
   ip: 192.168.125.184
   save: true
   show: true
- 
+
 dataset:
-  dir: ../io/input
-  list: ../io/list.txt
+  dir: ../io/coco
+  list: ../io/coco.txt
   names: ../names/coco.names
   res: ../io/output
 

@@ -4,7 +4,7 @@ framework = "pytorch"
 frame_version = "1.9"
 inputs = [1, 640, 640, 3]
 inputs_layout = "NHWC"
-pre_method = "resize"
+pre_method = "nop"
 pre_scale = [255.0, 255.0, 255.0]
 pre_mean = [0.0, 0.0, 0.0]
 channel_swap = [0, 1, 2]
@@ -18,7 +18,7 @@ raw = "../3_deploy/modelzoo/yolov10/imodel/8/Yolov10n_parsed.raw"
 jr_path = "../3_deploy/modelzoo/yolov10/imodel/8/"
 
 [quantize]
-forward_mode = "image" 
+forward_mode = "image"
 saturation = "kld"
 forward_dir = "./qtset/coco"
 forward_list = "./qtset/coco.txt "
@@ -51,6 +51,3 @@ json = "../3_deploy/modelzoo/yolov10/imodel/8/Yolov10n_BY.json"
 raw = "../3_deploy/modelzoo/yolov10/imodel/8/Yolov10n_BY.raw"
 input = "./qtset/coco/horses.jpg"
 backends = "BY,socket://ql100aiu@192.168.124.134:9981?npu=0x40000000&dma=0x80000000;Host"
-
-
-

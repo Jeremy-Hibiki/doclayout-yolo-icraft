@@ -9,9 +9,9 @@
   "clangd.fallbackFlags": [
     "-std=c++17",
     "-IC:\\Icraft\\CLI\\include",
-    "-IP:\\icraft-tutorial\\examples\\Deps\\thirdparty\\include\\Eigen-3.4.0",
-    "-IP:\\icraft-tutorial\\examples\\Deps\\thirdparty\\include",
-    "-IP:\\icraft-tutorial\\examples\\Deps\\modelzoo"
+    "-IE:\\Code\\icraft\\doclayout-yolo-icraft\\Deps\\thirdparty\\include\\Eigen-3.4.0",
+    "-IE:\\Code\\icraft\\doclayout-yolo-icraft\\Deps\\thirdparty\\include",
+    "-IE:\\Code\\icraft\\doclayout-yolo-icraft\\Deps\\modelzoo"
   ],
   "cmake.ignoreCMakeListsMissing": true,
   "python.terminal.activateEnvInCurrentTerminal": true,

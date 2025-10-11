@@ -1,8 +1,4 @@
 ﻿
-#include "icraft_utils.hpp"
-#include "postprocess_yolov10.hpp"
-#include "yaml-cpp/yaml.h"
-#include "yolov10_utils.hpp"
 #include <icraft-backends/buyibackend/buyibackend.h>
 #include <icraft-backends/hostbackend/backend.h>
 #include <icraft-backends/hostbackend/cuda/device.h>
@@ -11,6 +7,11 @@
 #include <icraft-xrt/dev/buyi_device.h>
 #include <icraft-xrt/dev/host_device.h>
 #include <opencv2/opencv.hpp>
+#include <yaml-cpp/yaml.h>
+
+#include "icraft_utils.hpp"
+#include "postprocess_yolov10.hpp"
+#include "yolov10_utils.hpp"
 
 using namespace icraft::xrt;
 using namespace icraft::xir;

@@ -16,9 +16,9 @@ imodel:
   show: true
 
 dataset:
-  dir: ../io/coco
-  list: ../io/coco.txt
-  names: ../names/coco.names
+  dir: ../io/pdf_imgs
+  list: ../io/kimi_k2.txt
+  names: ../names/doclayout.names
   res: ../io/output
 
 param:

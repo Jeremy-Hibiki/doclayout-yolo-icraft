@@ -7,7 +7,7 @@
 #include <unordered_set>
 
 
-std::vector<int> _getReal_out_channles(std::vector<int>ori_out_channles, int bits, int NOA) {
+std::vector<int> _getReal_out_channels(std::vector<int>ori_out_channles, int bits, int NOA) {
     int MINC = 0;
     int MAXC = 0;
     if (bits == 8) {
@@ -78,4 +78,3 @@ std::vector<std::vector<float>> set_norm_by_head(int NOH, int parts, std::vector
     }
     return _norm;
 }
-
