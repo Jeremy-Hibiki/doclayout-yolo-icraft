@@ -94,7 +94,7 @@ int main(int argc, char *argv[]) {
     // 前处理
     PicPre img(img_path, cv::IMREAD_COLOR);
 
-    img.Resize({netinfo.i_cubic[0].h, netinfo.i_cubic[0].w}, PicPre::BOTH_SIDE)
+    img.Resize({netinfo.i_cubic[0].h, netinfo.i_cubic[0].w}, PicPre::LONG_SIDE)
         .rPad();
 
     Tensor img_tensor = CvMat2Tensor(img.dst_img, network);

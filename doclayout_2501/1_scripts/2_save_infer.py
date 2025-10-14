@@ -40,9 +40,9 @@ def pred_one_image(img_path, model_path, test_size):
         print(out.shape, out.min(), out.max(), out.mean())
     print("*" * 80)
     # 结果重组
-    outputs_n1 = torch.cat((output[0], output[1]), 1)  # [1, 14, 160, 160]
-    outputs_n2 = torch.cat((output[2], output[3]), 1)  # [1, 14, 80, 80]
-    outputs_n3 = torch.cat((output[4], output[5]), 1)  # [1, 14, 40, 40]
+    outputs_n1 = torch.cat((output[1], output[0]), 1)
+    outputs_n2 = torch.cat((output[3], output[2]), 1)
+    outputs_n3 = torch.cat((output[5], output[4]), 1)
     outputs = [outputs_n1, outputs_n2, outputs_n3]
 
     x_cat = torch.cat([xi.view(xi.shape[0], nc + 4, -1) for xi in outputs], 2)

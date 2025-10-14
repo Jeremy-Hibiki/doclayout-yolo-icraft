@@ -15,8 +15,8 @@ from visualize import DOCLAYOUT_CLASSES, vis
 
 # ---------------------------------参数设置---------------------------------
 # 路径设置
-GENERATED_JSON_FILE = "../3_deploy/modelzoo/doclayout_yolo/imodel/8_nop/doclayout_yolo_parsed.json"
-GENERATED_RAW_FILE = "../3_deploy/modelzoo/doclayout_yolo/imodel/8_nop/doclayout_yolo_parsed.raw"
+GENERATED_JSON_FILE = "../3_deploy/modelzoo/doclayout_yolo/imodel/16/doclayout_yolo_quantized.json"
+GENERATED_RAW_FILE = "../3_deploy/modelzoo/doclayout_yolo/imodel/16/doclayout_yolo_quantized.raw"
 IMG_PATH = "./imgs/page_4.png"
 
 conf_thres = 0.25
@@ -44,12 +44,12 @@ def pred_one_image(img_path):
     # 模型前向推理
     generated_output = session.forward([input_tensor])
     # 6 out  in n,h,w,c format
-    # i = 0  out = (1, 80, 80, 80)
-    # i = 1  out = (1, 80, 80, 64)
-    # i = 2  out = (1, 40, 40, 80)
-    # i = 3  out = (1, 40, 40, 64)
-    # i = 4  out = (1, 20, 20, 80)
-    # i = 5  out = (1, 20, 20, 64)
+    # i = 0  out = (1, 160, 160, 10)
+    # i = 1  out = (1, 160, 160, 4)
+    # i = 2  out = (1, 80, 80, 10)
+    # i = 3  out = (1, 80, 80, 4)
+    # i = 4  out = (1, 40, 40, 10)
+    # i = 5  out = (1, 40, 40, 4)
     # check outputs
     # for i in range(6):
     #     out = np.array(generated_output[i])
@@ -57,25 +57,23 @@ def pred_one_image(img_path):
     print("INFO: get forward results!")
     # 组装成检测结果
     output_tensors = [torch.from_numpy(np.array(obj)).permute(0, 3, 1, 2).contiguous() for obj in generated_output]
-    for out in output_tensors:
-        print(f"{out.shape} {out.min()} ~ {out.max()} Mean: {out.mean()} Std: {out.std()}")
 
-    outputs_n1 = torch.cat((output_tensors[0], output_tensors[1]), 1)  # [1, 14, 160, 160]
-    outputs_n2 = torch.cat((output_tensors[2], output_tensors[3]), 1)  # [1, 14, 80, 80]
-    outputs_n3 = torch.cat((output_tensors[4], output_tensors[5]), 1)  # [1, 14, 40, 40]
+    outputs_n1 = torch.cat((output_tensors[1], output_tensors[0]), 1)  # [1, 14, 160, 160]
+    outputs_n2 = torch.cat((output_tensors[3], output_tensors[2]), 1)  # [1, 14, 80, 80]
+    outputs_n3 = torch.cat((output_tensors[5], output_tensors[4]), 1)  # [1, 14, 40, 40]
     outputs = [outputs_n1, outputs_n2, outputs_n3]
     print("*" * 80)
     # postprocess - dfl+sigmod
     shape = outputs[0].shape  # BCHW
     x_cat = torch.cat([xi.view(shape[0], nc + 4, -1) for xi in outputs], 2)
-    box, cls = x_cat.split((reg_max * 4, nc), 1)  # box = [1,64,8400], cls = [1,80,8400]
+    box, cls = x_cat.split((reg_max * 4, nc), 1)  # box = [1,4,8400], cls = [1,10,8400]
     dfl_layer = DFL(reg_max) if reg_max > 1 else nn.Identity()
     anchors, strides = (
         x.transpose(0, 1)
         for x in make_anchors(outputs, torch.from_numpy(np.array([8, 16, 32], dtype=np.float32)), 0.5)
     )
     dbox = dist2bbox(dfl_layer(box), anchors.unsqueeze(0), xywh=True, dim=1) * strides
-    y = torch.cat((dbox, cls.sigmoid()), 1)  # [1,84,8400]
+    y = torch.cat((dbox, cls.sigmoid()), 1)  # [1,14,8400]
     # print(y)
     # print('y = ',y.shape)
     # yolov10 postprocess - NMS free

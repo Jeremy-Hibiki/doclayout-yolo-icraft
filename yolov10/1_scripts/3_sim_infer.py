@@ -88,7 +88,6 @@ mask = preds[..., 4] > conf_thres
 b, _, c = preds.shape
 preds = preds.view(-1, preds.shape[-1])[mask.view(-1)]  # 取mask = True的结果，即score>conf的结果
 pred = preds.view(b, -1, c)  # [1,res_num,6]
-print(pred.shape)
 _, res_num, _ = pred.shape
 # rescale coords to img_raw size
 pred[0, :, :4] = scale_boxes(im.shape[0:2], pred[0, :, :4], img_raw.shape)

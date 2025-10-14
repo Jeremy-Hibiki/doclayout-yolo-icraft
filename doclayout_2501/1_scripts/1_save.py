@@ -35,8 +35,10 @@ BaseModel._predict_once = new_predict_once
 def new_Detect_forward(self: v10Detect, x):
     y = []
     for i in range(self.nl):
-        y.append(self.one2one_cv2[i](x[i]))
-        y.append(self.one2one_cv3[i](x[i]))
+        t1 = self.one2one_cv2[i](x[i])  # cv2 - 4
+        t2 = self.one2one_cv3[i](x[i])  # cv3 - 10
+        y.append(t2)
+        y.append(t1)
     return y
 
 

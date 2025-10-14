@@ -64,7 +64,6 @@ def icraft_pred(img_path):
     print("INFO: Create network!")
     # 创建Session
     session = Session.Create([HostBackend], generated_network.view(0), [HostDevice.Default()])
-    session.setLogIO(True)
     session.apply()
     # 模型前向推理
     generated_output = session.forward([input_tensor])
