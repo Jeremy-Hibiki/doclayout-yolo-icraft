@@ -17,7 +17,7 @@ from visualize import DOCLAYOUT_CLASSES, vis
 # 路径设置
 GENERATED_JSON_FILE = "../3_deploy/modelzoo/doclayout_yolo/imodel/16/doclayout_yolo_quantized.json"
 GENERATED_RAW_FILE = "../3_deploy/modelzoo/doclayout_yolo/imodel/16/doclayout_yolo_quantized.raw"
-IMG_PATH = "./imgs/page_4.png"
+IMG_PATH = r"..\3_deploy\modelzoo\doclayout_yolo\io\pdf_imgs\kimi_k2_1.png"
 
 conf_thres = 0.25
 max_det = 300

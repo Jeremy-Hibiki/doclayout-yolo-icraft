@@ -5,6 +5,8 @@
 
 #include <modelzoo_utils.hpp>
 
+#include "yolov10_utils.hpp"
+
 using namespace icraft::xrt;
 struct Grid {
   uint16_t location_x = 0;
@@ -50,7 +52,7 @@ template <typename T>
 void post_process(std::vector<int> &id_list, std::vector<float> &socre_list,
                   std::vector<cv::Rect2f> &box_list, T *tensor_data,
                   int obj_ptr_start, Grid &grid,
-                  std::vector<int> &real_out_channles, int bbox_info_channel,
+                  std::vector<int> &real_out_channels, int bbox_info_channel,
                   std::vector<float> norm, int stride,
                   std::vector<float> anchor, int NOC, float CONF,
                   bool MULTILABEL) {
@@ -63,14 +65,17 @@ void post_process(std::vector<int> &id_list, std::vector<float> &socre_list,
     auto realscore = _prob_;
 
     if (realscore > CONF) {
-      // getBbox
-      std::vector<float> ltrb =
-          dfl(tensor_data, norm[1], obj_ptr_start + real_out_channles[0],
-              bbox_info_channel);
-      float x1 = grid.location_x + 0.5 - ltrb[0];
-      float y1 = grid.location_y + 0.5 - ltrb[1];
-      float x2 = grid.location_x + 0.5 + ltrb[2];
-      float y2 = grid.location_y + 0.5 + ltrb[3];
+      // getBbox - 直接读取4个边界值，不使用DFL
+      int bbox_start = obj_ptr_start + real_out_channels[0];
+      float left = tensor_data[bbox_start + 0] * norm[1];
+      float top = tensor_data[bbox_start + 1] * norm[1];
+      float right = tensor_data[bbox_start + 2] * norm[1];
+      float bottom = tensor_data[bbox_start + 3] * norm[1];
+
+      float x1 = grid.location_x + 0.5 - left;
+      float y1 = grid.location_y + 0.5 - top;
+      float x2 = grid.location_x + 0.5 + right;
+      float y2 = grid.location_y + 0.5 + bottom;
 
       float x = ((x2 + x1) / 2.f) * stride;
       float y = ((y2 + y1) / 2.f) * stride;
@@ -89,14 +94,17 @@ void post_process(std::vector<int> &id_list, std::vector<float> &socre_list,
       auto _prob_ = sigmoid(tensor_data[obj_ptr_start + i] * norm[0]);
       auto realscore = _prob_;
       if (realscore > CONF) {
-        // getBbox
-        std::vector<float> ltrb =
-            dfl(tensor_data, norm[1], obj_ptr_start + real_out_channles[0],
-                bbox_info_channel);
-        float x1 = grid.location_x + 0.5 - ltrb[0];
-        float y1 = grid.location_y + 0.5 - ltrb[1];
-        float x2 = grid.location_x + 0.5 + ltrb[2];
-        float y2 = grid.location_y + 0.5 + ltrb[3];
+        // getBbox - 直接读取4个边界值，不使用DFL
+        int bbox_start = obj_ptr_start + real_out_channels[0];
+        float left = tensor_data[bbox_start + 0] * norm[1];
+        float top = tensor_data[bbox_start + 1] * norm[1];
+        float right = tensor_data[bbox_start + 2] * norm[1];
+        float bottom = tensor_data[bbox_start + 3] * norm[1];
+
+        float x1 = grid.location_x + 0.5 - left;
+        float y1 = grid.location_y + 0.5 - top;
+        float x2 = grid.location_x + 0.5 + right;
+        float y2 = grid.location_y + 0.5 + bottom;
 
         float x = ((x2 + x1) / 2.f) * stride;
         float y = ((y2 + y1) / 2.f) * stride;
@@ -120,9 +128,10 @@ void post_detpost_hard(const std::vector<Tensor> &output_tensors, PicPre &img,
                        std::vector<std::vector<std::vector<float>>> &ANCHORS,
                        std::vector<std::string> &LABELS, bool &show, bool &save,
                        std::string &resRoot, std::string &name,
-                       icraft::xrt::Device device, bool &run_sim,
+                       icraft::xrt::Device device,
+                       const std::string &runBackend,
                        std::vector<std::vector<float>> &_norm,
-                       std::vector<int> &real_out_channles,
+                       std::vector<int> &real_out_channels,
                        std::vector<float> &_stride, int bbox_info_channel) {
   std::vector<int> id_list;
   std::vector<float> socre_list;
@@ -147,7 +156,7 @@ void post_detpost_hard(const std::vector<Tensor> &output_tensors, PicPre &img,
         Grid grid = get_grid(output_tensors_bits, tensor_data, base_addr,
                              anchor_length);
         post_process(id_list, socre_list, box_list, (int8_t *)tensor_data,
-                     base_addr, grid, real_out_channles, bbox_info_channel,
+                     base_addr, grid, real_out_channels, bbox_info_channel,
                      norm, stride, _anchor_, N_CLASS, conf, MULTILABEL);
       }
       break;
@@ -160,7 +169,7 @@ void post_detpost_hard(const std::vector<Tensor> &output_tensors, PicPre &img,
         Grid grid = get_grid(output_tensors_bits, tensor_data, base_addr,
                              anchor_length);
         post_process(id_list, socre_list, box_list, (int16_t *)tensor_data,
-                     base_addr, grid, real_out_channles, bbox_info_channel,
+                     base_addr, grid, real_out_channels, bbox_info_channel,
                      norm, stride, _anchor_, N_CLASS, conf, MULTILABEL);
       }
       break;
@@ -173,7 +182,7 @@ void post_detpost_hard(const std::vector<Tensor> &output_tensors, PicPre &img,
   }
   // 后处理之NMS
   std::vector<std::tuple<int, float, cv::Rect2f>> nms_res;
-  if (fpga_nms && !run_sim) {
+  if (fpga_nms && runBackend.compare("buyi") == 0) {
     nms_res = nms_hard(box_list, socre_list, id_list, iou_thresh, device);
   } else {
     nms_res = nms_soft(id_list, socre_list, box_list, iou_thresh);
@@ -199,9 +208,10 @@ void post_detpost_soft(const std::vector<Tensor> &output_tensors, PicPre &img,
                        std::vector<std::vector<std::vector<float>>> &ANCHORS,
                        NetInfo &netinfo, int N_CLASS, float conf,
                        float iou_thresh, bool &fpga_nms,
-                       icraft::xrt::Device device, bool &run_sim,
-                       bool &MULTILABEL, bool &show, bool &save,
-                       std::string &resRoot, std::string &name) {
+                       icraft::xrt::Device device,
+                       const std::string &runBackend, bool &MULTILABEL,
+                       bool &show, bool &save, std::string &resRoot,
+                       std::string &name) {
 
   std::vector<int> id_list;
   std::vector<float> socre_list;
@@ -219,7 +229,7 @@ void post_detpost_soft(const std::vector<Tensor> &output_tensors, PicPre &img,
       for (size_t w = 0; w < _W; w++) {
         auto one_head_stride = stride[yolo];
         auto classPtr = tensor_data_class + h * _W * N_CLASS + w * N_CLASS;
-        auto boxPtr = tensor_data_box + h * _W * 64 + w * 64;
+        auto boxPtr = tensor_data_box + h * _W * 4 + w * 4;
         if (!MULTILABEL) {
           float *max_prob_ptr = std::max_element(classPtr, classPtr + N_CLASS);
           int max_index = std::distance(classPtr, max_prob_ptr);
@@ -227,12 +237,16 @@ void post_detpost_soft(const std::vector<Tensor> &output_tensors, PicPre &img,
           auto realscore = _prob_;
 
           if (realscore > conf) {
-            // getBbox
-            std::vector<float> ltrb = dfl(boxPtr, 1.0, 0, 64);
-            float x1 = w + 0.5 - ltrb[0];
-            float y1 = h + 0.5 - ltrb[1];
-            float x2 = w + 0.5 + ltrb[2];
-            float y2 = h + 0.5 + ltrb[3];
+            // getBbox - 直接读取4个边界值，不使用DFL
+            float left = boxPtr[0];
+            float top = boxPtr[1];
+            float right = boxPtr[2];
+            float bottom = boxPtr[3];
+
+            float x1 = w + 0.5 - left;
+            float y1 = h + 0.5 - top;
+            float x2 = w + 0.5 + right;
+            float y2 = h + 0.5 + bottom;
 
             float x_ = ((x2 + x1) / 2.f) * one_head_stride;
             float y_ = ((y2 + y1) / 2.f) * one_head_stride;
@@ -251,12 +265,16 @@ void post_detpost_soft(const std::vector<Tensor> &output_tensors, PicPre &img,
             auto realscore = _prob_;
             if (realscore > conf) {
 
-              // getBbox
-              std::vector<float> ltrb = dfl(boxPtr, 1.0, 0, 64);
-              float x1 = w + 0.5 - ltrb[0];
-              float y1 = h + 0.5 - ltrb[1];
-              float x2 = w + 0.5 + ltrb[2];
-              float y2 = h + 0.5 + ltrb[3];
+              // getBbox - 直接读取4个边界值，不使用DFL
+              float left = boxPtr[0];
+              float top = boxPtr[1];
+              float right = boxPtr[2];
+              float bottom = boxPtr[3];
+
+              float x1 = w + 0.5 - left;
+              float y1 = h + 0.5 - top;
+              float x2 = w + 0.5 + right;
+              float y2 = h + 0.5 + bottom;
 
               float x_ = ((x2 + x1) / 2.f) * one_head_stride;
               float y_ = ((y2 + y1) / 2.f) * one_head_stride;
@@ -280,7 +298,7 @@ void post_detpost_soft(const std::vector<Tensor> &output_tensors, PicPre &img,
   std::vector<std::tuple<int, float, cv::Rect2f>> nms_res;
   // auto post_start = std::chrono::system_clock::now();
 
-  if (fpga_nms && !run_sim) {
+  if (fpga_nms && runBackend.compare("buyi") == 0) {
     nms_res = nms_hard(box_list, socre_list, id_list, iou_thresh, device);
   } else {
     nms_res = nms_soft(id_list, socre_list, box_list, iou_thresh);
@@ -313,8 +331,8 @@ YoloPostResult post_detpost_plin(
     YoloPostResult &last_frame_result, NetInfo &netinfo, float conf,
     float iou_thresh, bool MULTILABEL, bool fpga_nms, int N_CLASS,
     std::vector<std::vector<std::vector<float>>> &ANCHORS,
-    icraft::xrt::Device device, bool &run_sim,
-    std::vector<std::vector<float>> &_norm, std::vector<int> &real_out_channles,
+    icraft::xrt::Device device, const std::string &runBackend,
+    std::vector<std::vector<float>> &_norm, std::vector<int> &real_out_channels,
     std::vector<float> &_stride, int bbox_info_channel) {
 
   std::vector<int> id_list;
@@ -339,7 +357,7 @@ YoloPostResult post_detpost_plin(
         Grid grid = get_grid(output_tensors_bits, tensor_data, base_addr,
                              anchor_length);
         post_process(id_list, socre_list, box_list, (int16_t *)tensor_data,
-                     base_addr, grid, real_out_channles, bbox_info_channel,
+                     base_addr, grid, real_out_channels, bbox_info_channel,
                      norm, stride, _anchor_, N_CLASS, conf, MULTILABEL);
       }
     } else {
@@ -349,7 +367,7 @@ YoloPostResult post_detpost_plin(
         Grid grid = get_grid(output_tensors_bits, tensor_data, base_addr,
                              anchor_length);
         post_process(id_list, socre_list, box_list, (int8_t *)tensor_data,
-                     base_addr, grid, real_out_channles, bbox_info_channel,
+                     base_addr, grid, real_out_channels, bbox_info_channel,
                      norm, stride, _anchor_, N_CLASS, conf, MULTILABEL);
       }
     }

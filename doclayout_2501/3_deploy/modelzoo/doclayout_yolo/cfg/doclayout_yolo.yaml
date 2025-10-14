@@ -1,19 +1,25 @@
+# stage:
 # "p": "parsed",
 # "o": "optimized",
 # "q": "quantized",
 # "a": "adapted",
-# "g": "BY",
+# "g": "BY/ZG",
+# run_backend: buyi/zg330/host
 imodel:
   cudamode: false
-  mmu: true
+  mmuMode: true
   speedmode: false
   compressFtmp: false
+  ocm_option: 4
   dir: ../imodel/8
-  stage: g
-  sim: false
-  ip: 192.168.125.184
+  stage: p
+  run_backend: host
+  ip: 192.168.125.181
   save: true
   show: true
+  dump_output: false
+  dump_format: SFB
+  log_path: ../io/output/ftmp
 
 dataset:
   dir: ../io/pdf_imgs

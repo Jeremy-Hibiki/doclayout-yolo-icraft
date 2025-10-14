@@ -8,9 +8,9 @@
   ],
   "clangd.fallbackFlags": [
     "-std=c++17",
-    "-IC:\\Icraft\\CLI\\include",
-    "-IE:\\Code\\icraft\\doclayout-yolo-icraft\\Deps\\thirdparty\\include\\Eigen-3.4.0",
-    "-IE:\\Code\\icraft\\doclayout-yolo-icraft\\Deps\\thirdparty\\include",
+    "-IC:\\IcraftMdz\\ThirdParty_v0.1\\Eigen-3.4.0\\include",
+    "-IC:\\IcraftMdz\\ThirdParty_v0.1\\YamlCpp\\include",
+    "-IC:\\IcraftMdz\\ThirdParty_v0.1\\opencv2\\include",
     "-IE:\\Code\\icraft\\doclayout-yolo-icraft\\Deps\\modelzoo"
   ],
   "cmake.ignoreCMakeListsMissing": true,

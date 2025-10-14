@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include <icraft-xir/core/network.h>
+#include <opencv2/opencv.hpp>
 #include <vector>
 
 std::vector<int> _getReal_out_channels(std::vector<int> ori_out_channels,
