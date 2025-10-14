@@ -51,7 +51,8 @@ url = "https://download.pytorch.org/whl/cu118"
 explicit = true
 
 [tool.uv.sources]
-icraft = { path = "C:/Icraft/icraft-3.7.1-cp38-none-win_amd64.whl" }
+# icraft = { path = "C:/Icraft/icraft-3.7.1-cp38-none-win_amd64.whl" }
+icraft = { path = "C:/Icraft/icraft-3.31.0-cp38-none-win_amd64.whl" }
 torch = { index = "torch-cpu" }
 torchvision = { index = "torch-cpu" }
 triton = { index = "torch-cpu" }
