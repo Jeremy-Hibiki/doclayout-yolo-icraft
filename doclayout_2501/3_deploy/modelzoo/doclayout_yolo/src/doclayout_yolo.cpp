@@ -12,6 +12,8 @@
 using namespace icraft::xrt;
 using namespace icraft::xir;
 
+void calctime(const icraft::xrt::Session &session);
+
 int main(int argc, char *argv[]) {
   try {
     YAML::Node config = YAML::LoadFile(argv[1]);
@@ -133,11 +135,11 @@ int main(int argc, char *argv[]) {
 #if defined(__aarch64__) || defined(_M_ARM64)
       device.reset(1);
       std::cout << "Image make time:" << std::endl;
-      calctime_detail(sess_imk);
+      calctime(sess_imk);
       std::cout << "Icore time:" << std::endl;
-      calctime_detail(sess_icore);
+      calctime(sess_icore);
       std::cout << "Detpost time:" << std::endl;
-      calctime_detail(sess_detpost);
+      calctime(sess_detpost);
 
 #endif
 
@@ -164,4 +166,31 @@ int main(int argc, char *argv[]) {
   } catch (const std::exception &e) {
     std::cout << e.what() << std::endl;
   }
+}
+
+/**
+ * Copy from v3.7 utils
+ * @param session
+ */
+void calctime(const icraft::xrt::Session &session) {
+  const auto network_name = session->network_view.network()->name;
+  double total_hard_time = 0;
+  double total_time = 0;
+  double total_memcpy_time = 0;
+  double total_other_time = 0;
+  const auto result = session.timeProfileResults();
+  for (auto [k, v] : result) {
+    auto &[time1, time2, time3, time4] = v;
+    total_time += time1;
+    total_memcpy_time += time2;
+    total_hard_time += time3;
+    total_other_time += time4;
+  }
+  std::cout << "=======TimeProfileResults of " << network_name
+            << "=========" << std::endl;
+  std::cout << fmt::format("Total_Time: {} ms, Total_MemcpyTime: {} ms , "
+                           "Total_HardTime: {} ms , Total_OtherTime: {}ms",
+                           total_time, total_memcpy_time, total_hard_time,
+                           total_other_time)
+            << std::endl;
 }
