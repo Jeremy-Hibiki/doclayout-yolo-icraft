@@ -1,15 +1,11 @@
-﻿
-#include <icraft-backends/buyibackend/buyibackend.h>
+﻿#include <icraft-backends/buyibackend/buyibackend.h>
 #include <icraft-backends/hostbackend/backend.h>
-#include <icraft-backends/hostbackend/cuda/device.h>
 #include <icraft-backends/hostbackend/utils.h>
 #include <icraft-xrt/core/session.h>
-#include <icraft-xrt/dev/buyi_device.h>
-#include <icraft-xrt/dev/host_device.h>
+#include <icraft_utils.hpp>
 #include <opencv2/opencv.hpp>
 #include <yaml-cpp/yaml.h>
 
-#include "icraft_utils.hpp"
 #include "postprocess_yolov10.hpp"
 #include "yolov10_utils.hpp"
 
@@ -22,49 +18,49 @@ int main(int argc, char *argv[]) {
     // icraft模型部署相关参数配置
     auto imodel = config["imodel"];
     // 仿真上板的jrpath配置
-    std::string stage = imodel["stage"].as<std::string>();
-    std::string folderPath = imodel["dir"].as<std::string>();
-    std::string runBackend = imodel["run_backend"].as<std::string>();
+    auto stage = imodel["stage"].as<std::string>();
+    auto folderPath = imodel["dir"].as<std::string>();
+    auto runBackend = imodel["run_backend"].as<std::string>();
     checkBackend(runBackend);
-    bool cudaMode = imodel["cudamode"].as<bool>();
-    bool openSpeedmode = imodel["speedmode"].as<bool>();
-    bool openCompressFtmp = imodel["compressFtmp"].as<bool>();
+    auto cudaMode = imodel["cudamode"].as<bool>();
+    auto openSpeedmode = imodel["speedmode"].as<bool>();
+    auto openCompressFtmp = imodel["compressFtmp"].as<bool>();
 
     bool mmuMode = true;
     int ocmOption = 4;
-    if (runBackend.compare("buyi") == 0)
+    if (runBackend == "buyi")
       mmuMode = imodel["mmuMode"].as<bool>();
-    if (runBackend.compare("zg330") == 0)
+    if (runBackend == "zg330")
       ocmOption = imodel["ocm_option"].as<int>();
 
-    auto JR_PATH = getJrPath(runBackend, folderPath, stage);
+    auto [JSON_PATH, RAW_PATH] = getJrPath(runBackend, folderPath, stage);
     // URL配置
-    std::string ip = imodel["ip"].as<std::string>();
+    auto ip = imodel["ip"].as<std::string>();
     // 可视化配置
-    bool show = imodel["show"].as<bool>();
-    bool save = imodel["save"].as<bool>();
+    auto show = imodel["show"].as<bool>();
+    auto save = imodel["save"].as<bool>();
     // dumpOutputFtmp配置
     bool dump_output = imodel["dump_output"].as<bool>();
-    std::string dump_format = imodel["dump_format"].as<std::string>();
-    std::string log_path = imodel["log_path"].as<std::string>();
+    auto dump_format = imodel["dump_format"].as<std::string>();
+    auto log_path = imodel["log_path"].as<std::string>();
 
     // 数据集相关参数配置
     auto dataset = config["dataset"];
-    std::string imgRoot = dataset["dir"].as<std::string>();
-    std::string imgList = dataset["list"].as<std::string>();
-    std::string names_path = dataset["names"].as<std::string>();
-    std::string resRoot = dataset["res"].as<std::string>();
+    auto imgRoot = dataset["dir"].as<std::string>();
+    auto imgList = dataset["list"].as<std::string>();
+    auto names_path = dataset["names"].as<std::string>();
+    auto resRoot = dataset["res"].as<std::string>();
     checkDir(resRoot);
     auto LABELS = toVector(names_path);
     // 模型自身相关参数配置
     auto param = config["param"];
-    float conf = param["conf"].as<float>();
-    float iou_thresh = param["iou_thresh"].as<float>();
-    bool MULTILABEL = param["multilabel"].as<bool>();
-    bool fpga_nms = param["fpga_nms"].as<bool>();
-    int N_CLASS = param["number_of_class"].as<int>();
-    int NOH = param["number_of_head"].as<int>();
-    std::vector<std::vector<std::vector<float>>> ANCHORS =
+    auto conf = param["conf"].as<float>();
+    auto iou_thresh = param["iou_thresh"].as<float>();
+    auto MULTILABEL = param["multilabel"].as<bool>();
+    auto fpga_nms = param["fpga_nms"].as<bool>();
+    auto N_CLASS = param["number_of_class"].as<int>();
+    auto NOH = param["number_of_head"].as<int>();
+    auto ANCHORS =
         param["anchors"].as<std::vector<std::vector<std::vector<float>>>>();
 
     int bbox_info_channel = 4; // 无DFL
@@ -72,7 +68,7 @@ int main(int argc, char *argv[]) {
     int parts = ori_out_channels.size(); // parts = 2
 
     // 加载network
-    Network network = loadNetwork(JR_PATH.first, JR_PATH.second);
+    Network network = loadNetwork(JSON_PATH, RAW_PATH);
     // 初始化netinfo
     NetInfo netinfo = NetInfo(network);
 
@@ -94,6 +90,11 @@ int main(int argc, char *argv[]) {
     // session执行前必须进行apply部署操作
     session.apply();
 
+    auto sess_imk = session.sub(1, 2);
+    auto sess_icore = session.sub(2, network->ops.size() - 2);
+    auto sess_detpost =
+        session.sub(network->ops.size() - 2, network->ops.size() - 1);
+
     // 统计图片数量
     int index = 0;
     auto namevector = toVector(imgList);
@@ -113,37 +114,44 @@ int main(int argc, char *argv[]) {
 
       dmaInit(runBackend, netinfo.ImageMake_on, img_tensor, device);
 
-      std::vector<Tensor> outputs = session.forward({img_tensor});
+      auto outputs_imk = sess_imk.forward({img_tensor});
+      auto outputs_icore = sess_icore.forward(outputs_imk);
+      auto outputs = sess_detpost.forward(outputs_icore);
+
       // check outputs
-      // for(auto output : outputs){
-      // 	std::cout << output.dtype()->shape << std::endl;
-      // }
+      std::cout << std::endl;
+      for (const auto &output : outputs) {
+        std::cout << output.dtype()->shape << std::endl;
+      }
       // -----dumpOutputFtmp-------
       if (dump_output) {
         dumpOutputFtmp(network, outputs, dump_format, log_path);
       }
-      if (runBackend.compare("host") != 0)
+      if (runBackend != "host")
         device.reset(1);
-// 计时
-// #ifdef __linux__
+      // 计时
 #if defined(__aarch64__) || defined(_M_ARM64)
       device.reset(1);
-      calctime_detail(session);
+      std::cout << "Image make time:" << std::endl;
+      calctime_detail(sess_imk);
+      std::cout << "Icore time:" << std::endl;
+      calctime_detail(sess_icore);
+      std::cout << "Detpost time:" << std::endl;
+      calctime_detail(sess_detpost);
+
 #endif
 
       // default:netinfo.DetPost_on
       if (netinfo.DetPost_on) {
         std::vector<float> normalratio = netinfo.o_scale;
-        std::vector<int> real_out_channels = _getReal_out_channels(
+        std::vector<int> real_out_channels = getReal_out_channels(
             ori_out_channels, netinfo.detpost_bit, N_CLASS);
-        std::vector<std::vector<float>> _norm =
-            set_norm_by_head(NOH, parts, normalratio);
+        auto _norm = set_norm_by_head(NOH, parts, normalratio);
         std::vector<float> _stride = get_stride(netinfo);
         post_detpost_hard(outputs, img, netinfo, conf, iou_thresh, MULTILABEL,
                           fpga_nms, N_CLASS, ANCHORS, LABELS, show, save,
                           resRoot, name, device, runBackend, _norm,
                           real_out_channels, _stride, bbox_info_channel);
-
       } else {
         post_detpost_soft(outputs, img, LABELS, ANCHORS, netinfo, N_CLASS, conf,
                           iou_thresh, fpga_nms, device, runBackend, MULTILABEL,

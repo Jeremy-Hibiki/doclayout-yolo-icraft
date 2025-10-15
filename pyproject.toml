@@ -11,10 +11,11 @@ dependencies = [
     "huggingface-hub>=0.35.3",
     "icraft==3.7.1",
     "numpy>=1.24.4",
-    "onnx>=1.17.0",
     "opencv-python>=4.12.0.88",
-    "pandas",
+    "openpyxl>=3.1.5",
+    "pandas==1.3.5",
     "pymupdf>=1.24.11",
+    "pyrtutils",
     "torch==2.0.1",
     "torchvision==0.15.2",
     "triton==2.0.0; sys_platform == 'linux'",
@@ -56,6 +57,8 @@ icraft = { path = "C:/Icraft/icraft-3.31.0-cp38-none-win_amd64.whl" }
 torch = { index = "torch-cpu" }
 torchvision = { index = "torch-cpu" }
 triton = { index = "torch-cpu" }
+# pyrtutils = { path = "./Deps/modelzoo", editable = true }
+pyrtutils = { path = "./doclayout_2501/3_deploy/modelzoo/doclayout_yolo/modelzoo_utils", editable = true }
 
 [tool.ruff]
 line-length = 120

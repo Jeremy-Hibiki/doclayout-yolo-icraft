@@ -11,9 +11,9 @@ imodel:
   speedmode: false
   compressFtmp: false
   ocm_option: 4
-  dir: ../imodel/8
-  stage: p
-  run_backend: host
+  dir: ../imodel/mix
+  stage: g
+  run_backend: BY
   ip: 192.168.125.181
   save: true
   show: true

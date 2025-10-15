@@ -14,7 +14,7 @@ struct Grid {
   uint16_t anchor_index = 0;
 };
 
-std::vector<float> get_stride(NetInfo &netinfo) {
+inline std::vector<float> get_stride(NetInfo &netinfo) {
   std::vector<float> stride;
   for (auto i : netinfo.o_cubic) {
     stride.emplace_back(netinfo.i_cubic[0].h / i.h);
@@ -85,8 +85,8 @@ void post_process(std::vector<int> &id_list, std::vector<float> &socre_list,
 
       id_list.emplace_back(max_index);
       socre_list.emplace_back(realscore);
-      box_list.emplace_back(cv::Rect2f(
-          (xywh[0] - xywh[2] / 2), (xywh[1] - xywh[3] / 2), xywh[2], xywh[3]));
+      box_list.emplace_back((xywh[0] - xywh[2] / 2), (xywh[1] - xywh[3] / 2),
+                            xywh[2], xywh[3]);
     }
   } else {
     for (size_t i = 0; i < NOC; i++) {
@@ -114,25 +114,22 @@ void post_process(std::vector<int> &id_list, std::vector<float> &socre_list,
 
         id_list.emplace_back(i);
         socre_list.emplace_back(realscore);
-        box_list.emplace_back(cv::Rect2f((xywh[0] - xywh[2] / 2),
-                                         (xywh[1] - xywh[3] / 2), xywh[2],
-                                         xywh[3]));
+        box_list.emplace_back((xywh[0] - xywh[2] / 2), (xywh[1] - xywh[3] / 2),
+                              xywh[2], xywh[3]);
       }
     }
   }
 }
 
-void post_detpost_hard(const std::vector<Tensor> &output_tensors, PicPre &img,
-                       NetInfo &netinfo, float conf, float iou_thresh,
-                       bool MULTILABEL, bool fpga_nms, int N_CLASS,
-                       std::vector<std::vector<std::vector<float>>> &ANCHORS,
-                       std::vector<std::string> &LABELS, bool &show, bool &save,
-                       std::string &resRoot, std::string &name,
-                       icraft::xrt::Device device,
-                       const std::string &runBackend,
-                       std::vector<std::vector<float>> &_norm,
-                       std::vector<int> &real_out_channels,
-                       std::vector<float> &_stride, int bbox_info_channel) {
+inline void post_detpost_hard(
+    const std::vector<Tensor> &output_tensors, PicPre &img, NetInfo &netinfo,
+    float conf, float iou_thresh, bool MULTILABEL, bool fpga_nms, int N_CLASS,
+    std::vector<std::vector<std::vector<float>>> &ANCHORS,
+    std::vector<std::string> &LABELS, bool &show, bool &save,
+    std::string &resRoot, std::string &name, icraft::xrt::Device device,
+    const std::string &runBackend, std::vector<std::vector<float>> &_norm,
+    std::vector<int> &real_out_channels, std::vector<float> &_stride,
+    int bbox_info_channel) {
   std::vector<int> id_list;
   std::vector<float> socre_list;
   std::vector<cv::Rect2f> box_list;
@@ -203,15 +200,14 @@ void post_detpost_hard(const std::vector<Tensor> &output_tensors, PicPre &img,
   }
 }
 
-void post_detpost_soft(const std::vector<Tensor> &output_tensors, PicPre &img,
-                       std::vector<std::string> &LABELS,
-                       std::vector<std::vector<std::vector<float>>> &ANCHORS,
-                       NetInfo &netinfo, int N_CLASS, float conf,
-                       float iou_thresh, bool &fpga_nms,
-                       icraft::xrt::Device device,
-                       const std::string &runBackend, bool &MULTILABEL,
-                       bool &show, bool &save, std::string &resRoot,
-                       std::string &name) {
+inline void
+post_detpost_soft(const std::vector<Tensor> &output_tensors, PicPre &img,
+                  std::vector<std::string> &LABELS,
+                  std::vector<std::vector<std::vector<float>>> &ANCHORS,
+                  NetInfo &netinfo, int N_CLASS, float conf, float iou_thresh,
+                  bool &fpga_nms, icraft::xrt::Device device,
+                  const std::string &runBackend, bool &MULTILABEL, bool &show,
+                  bool &save, std::string &resRoot, std::string &name) {
 
   std::vector<int> id_list;
   std::vector<float> socre_list;
@@ -298,7 +294,7 @@ void post_detpost_soft(const std::vector<Tensor> &output_tensors, PicPre &img,
   std::vector<std::tuple<int, float, cv::Rect2f>> nms_res;
   // auto post_start = std::chrono::system_clock::now();
 
-  if (fpga_nms && runBackend.compare("buyi") == 0) {
+  if (fpga_nms && runBackend == "buyi") {
     nms_res = nms_hard(box_list, socre_list, id_list, iou_thresh, device);
   } else {
     nms_res = nms_soft(id_list, socre_list, box_list, iou_thresh);
@@ -319,14 +315,14 @@ void post_detpost_soft(const std::vector<Tensor> &output_tensors, PicPre &img,
 }
 
 // smooth
-const float ALPHA = 0.5f;
-const float SMOOTH_IOU = 0.80f;
+constexpr float ALPHA = 0.5f;
+constexpr float SMOOTH_IOU = 0.80f;
 
 using YoloPostResult =
     std::tuple<std::vector<int>, std::vector<float>,
                std::vector<cv::Rect2f>>; // box_list, id_list, score_list
 
-YoloPostResult post_detpost_plin(
+inline YoloPostResult post_detpost_plin(
     const std::vector<Tensor> &output_tensors,
     YoloPostResult &last_frame_result, NetInfo &netinfo, float conf,
     float iou_thresh, bool MULTILABEL, bool fpga_nms, int N_CLASS,
@@ -338,7 +334,6 @@ YoloPostResult post_detpost_plin(
   std::vector<int> id_list;
   std::vector<float> socre_list;
   std::vector<cv::Rect2f> box_list;
-  std::vector<float> stride = get_stride(netinfo);
   for (size_t i = 0; i < output_tensors.size(); i++) {
 
     auto host_tensor = output_tensors[i].to(HostDevice::MemRegion());
@@ -347,7 +342,7 @@ YoloPostResult post_detpost_plin(
     int obj_num = output_tensors[i].dtype()->shape[2];
     int anchor_length = output_tensors[i].dtype()->shape[3];
 
-    auto norm = _norm[i];
+    const auto &norm = _norm[i];
     auto stride = _stride[i];
     std::vector<float> _anchor_ = {};
     if (output_tensors_bits == 16) {

@@ -1,11 +1,10 @@
 ﻿#pragma once
 
-#include <icraft-xir/core/network.h>
-#include <opencv2/opencv.hpp>
 #include <vector>
 
-std::vector<int> _getReal_out_channels(std::vector<int> ori_out_channels,
-                                       int bits, int NOA) {
+inline std::vector<int>
+getReal_out_channels(const std::vector<int> &ori_out_channels, const int bits,
+                     const int NOA) {
   int MINC = 0;
   int MAXC = 0;
   if (bits == 8) {
@@ -32,21 +31,17 @@ std::vector<int> _getReal_out_channels(std::vector<int> ori_out_channels,
     return ceil((float)ori_c / (float)MAXC) * MAXC;
   };
 
-  int anchor_length = 0;
   switch (ori_out_channels.size()) {
   case 1: {
-    int oneAnchor = ori_out_channels[0] / NOA;
-    int anchor_length = _last_c(oneAnchor);
+    const int oneAnchor = ori_out_channels[0] / NOA;
+    const int anchor_length = _last_c(oneAnchor);
     return std::vector<int>{NOA * anchor_length};
   }
   case 2: {
-    anchor_length = _last_c(ori_out_channels[1]) + _mid_c(ori_out_channels[0]);
     return std::vector<int>{_mid_c(ori_out_channels[0]),
                             _last_c(ori_out_channels[1])};
   }
   case 3: {
-    anchor_length = _last_c(ori_out_channels[2]) + _mid_c(ori_out_channels[1]) +
-                    _mid_c(ori_out_channels[0]);
     return std::vector<int>{_mid_c(ori_out_channels[0]),
                             _mid_c(ori_out_channels[1]),
                             _last_c(ori_out_channels[2])};
@@ -59,8 +54,9 @@ std::vector<int> _getReal_out_channels(std::vector<int> ori_out_channels,
 }
 
 // 根据每个head数，将原本1维的norm分组
-std::vector<std::vector<float>>
-set_norm_by_head(int NOH, int parts, std::vector<float> &normalratio) {
+inline std::vector<std::vector<float>>
+set_norm_by_head(const int NOH, const int parts,
+                 const std::vector<float> &normalratio) {
   std::vector<std::vector<float>> _norm;
   for (size_t i = 0; i < NOH; i++) {
     std::vector<float> _norm_;

@@ -9,13 +9,13 @@ pre_scale = [255.0, 255.0, 255.0]
 pre_mean = [0.0, 0.0, 0.0]
 channel_swap = [0, 1, 2]
 network = "fmodel/doclayout_yolo_docstructbench_imgsz1280_2501.pt"
-jr_path = "../3_deploy/modelzoo/doclayout_yolo/imodel/8/"
+jr_path = "../3_deploy/imodel/BY/8/"
 
 [optimize]
 target = "BUYI"
-json = "../3_deploy/modelzoo/doclayout_yolo/imodel/8/doclayout_yolo_parsed.json"
-raw = "../3_deploy/modelzoo/doclayout_yolo/imodel/8/doclayout_yolo_parsed.raw"
-jr_path = "../3_deploy/modelzoo/doclayout_yolo/imodel/8/"
+json = "../3_deploy/imodel/BY/8/doclayout_yolo_parsed.json"
+raw = "../3_deploy/imodel/BY/8/doclayout_yolo_parsed.raw"
+jr_path = "../3_deploy/imodel/BY/8/"
 
 [quantize]
 forward_mode = "image"
@@ -24,30 +24,30 @@ forward_dir = "./qtset/pdf_imgs"
 forward_list = "./qtset/pdf_imgs.txt "
 batch = 1
 bits = 8
-json = "../3_deploy/modelzoo/doclayout_yolo/imodel/8/doclayout_yolo_optimized.json"
-raw = "../3_deploy/modelzoo/doclayout_yolo/imodel/8/doclayout_yolo_optimized.raw"
-jr_path = "../3_deploy/modelzoo/doclayout_yolo/imodel/8/"
+json = "../3_deploy/imodel/BY/8/doclayout_yolo_optimized.json"
+raw = "../3_deploy/imodel/BY/8/doclayout_yolo_optimized.raw"
+jr_path = "../3_deploy/imodel/BY/8/"
 per = "channel"
 target = "buyi"
 
 [adapt]
 target = "BUYI"
-json = "../3_deploy/modelzoo/doclayout_yolo/imodel/8/doclayout_yolo_quantized.json"
-raw = "../3_deploy/modelzoo/doclayout_yolo/imodel/8/doclayout_yolo_quantized.raw"
-jr_path = "../3_deploy/modelzoo/doclayout_yolo/imodel/8/"
+json = "../3_deploy/imodel/BY/8/doclayout_yolo_quantized.json"
+raw = "../3_deploy/imodel/BY/8/doclayout_yolo_quantized.raw"
+jr_path = "../3_deploy/imodel/BY/8/"
 pass_on = "customop.ImageMakePass,customop.DetPostPass"
 custom_config = "config/customop/yolov10.toml"
 
 [generate]
-json = "../3_deploy/modelzoo/doclayout_yolo/imodel/8/doclayout_yolo_adapted.json"
-raw = "../3_deploy/modelzoo/doclayout_yolo/imodel/8/doclayout_yolo_adapted.raw"
-jr_path = "../3_deploy/modelzoo/doclayout_yolo/imodel/8/"
+json = "../3_deploy/imodel/BY/8/doclayout_yolo_adapted.json"
+raw = "../3_deploy/imodel/BY/8/doclayout_yolo_adapted.raw"
+jr_path = "../3_deploy/imodel/BY/8/"
 
 [run]
 log_time = true
 log_io = true
 dump_format = "SFB"
-json = "../3_deploy/modelzoo/doclayout_yolo/imodel/8/doclayout_yolo_BY.json"
-raw = "../3_deploy/modelzoo/doclayout_yolo/imodel/8/doclayout_yolo_BY.raw"
-input = "./qtset/pdf_imgs/page_5.png"
-backends = "Host"
+json = "../3_deploy/imodel/BY/8/doclayout_yolo_BY.json"
+raw = "../3_deploy/imodel/BY/8/doclayout_yolo_BY.raw"
+input = "./qtset/pdf_imgs/page_4.png"
+backends = "BY,socket://ql100aiu@192.168.124.134:9981?npu=0x40000000&dma=0x80000000;Host"
