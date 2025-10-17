@@ -87,15 +87,15 @@ int main(int argc, char *argv[]) {
         initSession(runBackend, network, device, ocmOption,
                     netinfo.mmu || mmuMode, openSpeedmode, openCompressFtmp);
 
-    // 开启计时功能
-    session.enableTimeProfile(true);
     // session执行前必须进行apply部署操作
     session.apply();
 
-    auto sess_imk = session.sub(1, 2);
-    auto sess_icore = session.sub(2, network->ops.size() - 2);
-    auto sess_detpost =
-        session.sub(network->ops.size() - 2, network->ops.size() - 1);
+    auto imkSession = session.sub(1, 2);
+    imkSession.enableTimeProfile(true);
+    auto icoreSession = session.sub(2, - 2);
+    icoreSession.enableTimeProfile(true);
+    auto detpostSess = session.sub(-2, -1);
+    detpostSess.enableTimeProfile(true);
 
     // 统计图片数量
     int index = 0;
@@ -113,18 +113,27 @@ int main(int argc, char *argv[]) {
           .rPad();
 
       Tensor img_tensor = CvMat2Tensor(img.dst_img, network);
+      std::cout << "Image Size: " << img_tensor.dtype()->shape << std::endl;
 
       dmaInit(runBackend, netinfo.ImageMake_on, img_tensor, device);
-
-      auto outputs_imk = sess_imk.forward({img_tensor});
-      auto outputs_icore = sess_icore.forward(outputs_imk);
-      auto outputs = sess_detpost.forward(outputs_icore);
-
-      // check outputs
-      std::cout << std::endl;
-      for (const auto &output : outputs) {
-        std::cout << output.dtype()->shape << std::endl;
+      auto imkOutputs = imkSession.forward({ img_tensor });
+      std::cout << "imkOutputs size: ";
+      for (const auto& t : imkOutputs) {
+          std::cout << t.dtype()->shape << " ";
       }
+      std::cout << std::endl;
+      auto icoreOutputs = icoreSession.forward(imkOutputs);
+      std::cout << "icoreOutputs size: ";
+      for (const auto& t : icoreOutputs) {
+          std::cout << t.dtype()->shape << " ";
+      }
+      std::cout << std::endl;
+      auto outputs = detpostSess.forward(icoreOutputs);
+      std::cout << "detpostOutputs size: ";
+      for (const auto& t : outputs) {
+          std::cout << t.dtype()->shape << " ";
+      }
+      std::cout << std::endl;
       // -----dumpOutputFtmp-------
       if (dump_output) {
         dumpOutputFtmp(network, outputs, dump_format, log_path);
@@ -146,10 +155,10 @@ int main(int argc, char *argv[]) {
       // default:netinfo.DetPost_on
       if (netinfo.DetPost_on) {
         std::vector<float> normalratio = netinfo.o_scale;
-        std::vector<int> real_out_channels = getReal_out_channels(
+        auto real_out_channels = getReal_out_channels(
             ori_out_channels, netinfo.detpost_bit, N_CLASS);
         auto _norm = set_norm_by_head(NOH, parts, normalratio);
-        std::vector<float> _stride = get_stride(netinfo);
+        auto _stride = get_stride(netinfo);
         post_detpost_hard(outputs, img, netinfo, conf, iou_thresh, MULTILABEL,
                           fpga_nms, N_CLASS, ANCHORS, LABELS, show, save,
                           resRoot, name, device, runBackend, _norm,

@@ -1,0 +1,25 @@
+{
+  "clangd.arguments": [
+    "--header-insertion-decorators",
+    "--all-scopes-completion",
+    "--completion-style=detailed",
+    // "--query-driver=C:/Program Files/Microsoft Visual Studio/2022/*/VC/Tools/MSVC/*/bin/Hostx64/x64/cl.exe",
+    "--query-driver=C:/Program Files/Microsoft Visual Studio/18/*/VC/Tools/MSVC/*/bin/Hostx64/x64/cl.exe",
+    "--compile-commands-dir=build"
+  ],
+  "clangd.fallbackFlags": [
+    "-std=c++17",
+    "-IC:\\Icraft\\CLI\\include",
+    "-IC:\\IcraftMdz\\ThirdParty_v0.1\\Eigen-3.4.0\\include",
+    "-IC:\\IcraftMdz\\ThirdParty_v0.1\\YamlCpp\\include",
+    "-IC:\\IcraftMdz\\ThirdParty_v0.1\\opencv2\\include",
+    "-IE:\\Code\\icraft\\doclayout-yolo-icraft\\doclayout_2501\\3_deploy\\modelzoo\\doclayout_yolo\\modelzoo_utils"
+  ],
+  "cmake.ignoreCMakeListsMissing": true,
+  "python.terminal.activateEnvInCurrentTerminal": true,
+  "python.terminal.activateEnvironment": true,
+  "cmake.debugConfig": {
+      "type": "lldb",
+  },
+  "cmake.useVsDeveloperEnvironment": "always",
+}

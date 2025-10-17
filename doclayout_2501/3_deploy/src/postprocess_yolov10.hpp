@@ -1,9 +1,8 @@
 ﻿#pragma once
 #include <icraft-xrt/core/tensor.h>
 #include <icraft-xrt/dev/host_device.h>
-#include <opencv2/opencv.hpp>
-
 #include <modelzoo_utils.hpp>
+#include <opencv2/opencv.hpp>
 
 #include "yolov10_utils.hpp"
 
@@ -14,16 +13,17 @@ struct Grid {
   uint16_t anchor_index = 0;
 };
 
-inline std::vector<float> get_stride(NetInfo &netinfo) {
-  std::vector<float> stride;
-  for (auto i : netinfo.o_cubic) {
+inline std::vector<int> get_stride(const NetInfo &netinfo) {
+  std::vector<int> stride;
+  for (const auto i : netinfo.o_cubic) {
     stride.emplace_back(netinfo.i_cubic[0].h / i.h);
   }
   return stride;
 };
 
 template <typename T>
-Grid get_grid(int bits, T *tensor_data, int base_addr, int anchor_length) {
+Grid get_grid(const int bits, T *tensor_data, const int base_addr,
+              const int anchor_length) {
   Grid grid;
   uint16_t anchor_index;
   uint16_t location_y;
@@ -49,13 +49,13 @@ Grid get_grid(int bits, T *tensor_data, int base_addr, int anchor_length) {
 }
 
 template <typename T>
-void post_process(std::vector<int> &id_list, std::vector<float> &socre_list,
+void post_process(std::vector<int> &id_list, std::vector<float> &score_list,
                   std::vector<cv::Rect2f> &box_list, T *tensor_data,
                   int obj_ptr_start, Grid &grid,
                   std::vector<int> &real_out_channels, int bbox_info_channel,
                   std::vector<float> norm, int stride,
                   std::vector<float> anchor, int NOC, float CONF,
-                  bool MULTILABEL) {
+                  const bool MULTILABEL) {
   if (!MULTILABEL) {
     // getMaxRealScore;
     T *class_ptr_start = tensor_data + obj_ptr_start;
@@ -84,7 +84,7 @@ void post_process(std::vector<int> &id_list, std::vector<float> &socre_list,
       std::vector<float> xywh = {x, y, w, h};
 
       id_list.emplace_back(max_index);
-      socre_list.emplace_back(realscore);
+      score_list.emplace_back(realscore);
       box_list.emplace_back((xywh[0] - xywh[2] / 2), (xywh[1] - xywh[3] / 2),
                             xywh[2], xywh[3]);
     }
@@ -113,7 +113,7 @@ void post_process(std::vector<int> &id_list, std::vector<float> &socre_list,
         std::vector<float> xywh = {x, y, w, h};
 
         id_list.emplace_back(i);
-        socre_list.emplace_back(realscore);
+        score_list.emplace_back(realscore);
         box_list.emplace_back((xywh[0] - xywh[2] / 2), (xywh[1] - xywh[3] / 2),
                               xywh[2], xywh[3]);
       }
@@ -123,13 +123,14 @@ void post_process(std::vector<int> &id_list, std::vector<float> &socre_list,
 
 inline void post_detpost_hard(
     const std::vector<Tensor> &output_tensors, PicPre &img, NetInfo &netinfo,
-    float conf, float iou_thresh, bool MULTILABEL, bool fpga_nms, int N_CLASS,
+    const float conf, const float iou_thresh, const bool MULTILABEL,
+    const bool fpga_nms, const int N_CLASS,
     std::vector<std::vector<std::vector<float>>> &ANCHORS,
-    std::vector<std::string> &LABELS, bool &show, bool &save,
-    std::string &resRoot, std::string &name, icraft::xrt::Device device,
-    const std::string &runBackend, std::vector<std::vector<float>> &_norm,
-    std::vector<int> &real_out_channels, std::vector<float> &_stride,
-    int bbox_info_channel) {
+    const std::vector<std::string> &LABELS, const bool &show, const bool &save,
+    const std::string &resRoot, const std::string &name, Device device,
+    const std::string &runBackend, const std::vector<std::vector<float>> &_norm,
+    std::vector<int> &real_out_channels, const std::vector<int> &_stride,
+    const int bbox_info_channel) {
   std::vector<int> id_list;
   std::vector<float> socre_list;
   std::vector<cv::Rect2f> box_list;
@@ -179,7 +180,7 @@ inline void post_detpost_hard(
   }
   // 后处理之NMS
   std::vector<std::tuple<int, float, cv::Rect2f>> nms_res;
-  if (fpga_nms && runBackend.compare("buyi") == 0) {
+  if (fpga_nms && runBackend == "buyi") {
     nms_res = nms_hard(box_list, socre_list, id_list, iou_thresh, device);
   } else {
     nms_res = nms_soft(id_list, socre_list, box_list, iou_thresh);
@@ -205,14 +206,14 @@ post_detpost_soft(const std::vector<Tensor> &output_tensors, PicPre &img,
                   std::vector<std::string> &LABELS,
                   std::vector<std::vector<std::vector<float>>> &ANCHORS,
                   NetInfo &netinfo, int N_CLASS, float conf, float iou_thresh,
-                  bool &fpga_nms, icraft::xrt::Device device,
-                  const std::string &runBackend, bool &MULTILABEL, bool &show,
-                  bool &save, std::string &resRoot, std::string &name) {
+                  bool &fpga_nms, Device device, const std::string &runBackend,
+                  bool &MULTILABEL, bool &show, bool &save,
+                  std::string &resRoot, std::string &name) {
 
   std::vector<int> id_list;
   std::vector<float> socre_list;
   std::vector<cv::Rect2f> box_list;
-  std::vector<float> stride = get_stride(netinfo);
+  std::vector<int> stride = get_stride(netinfo);
   for (int yolo = 0; yolo < output_tensors.size() - 1; yolo = yolo + 2) {
     int _H = output_tensors[yolo].dtype()->shape[1];
     int _W = output_tensors[yolo].dtype()->shape[2];
@@ -251,9 +252,8 @@ post_detpost_soft(const std::vector<Tensor> &output_tensors, PicPre &img,
             std::vector<float> xywh = {x_, y_, w_, h_};
             id_list.emplace_back(max_index);
             socre_list.emplace_back(realscore);
-            box_list.emplace_back(cv::Rect2f((xywh[0] - xywh[2] / 2),
-                                             (xywh[1] - xywh[3] / 2), xywh[2],
-                                             xywh[3]));
+            box_list.emplace_back((xywh[0] - xywh[2] / 2),
+                                  (xywh[1] - xywh[3] / 2), xywh[2], xywh[3]);
           }
         } else {
           for (size_t cls_idx = 0; cls_idx < N_CLASS; cls_idx++) {
@@ -280,9 +280,8 @@ post_detpost_soft(const std::vector<Tensor> &output_tensors, PicPre &img,
 
               id_list.emplace_back(cls_idx);
               socre_list.emplace_back(realscore);
-              box_list.emplace_back(cv::Rect2f((xywh[0] - xywh[2] / 2),
-                                               (xywh[1] - xywh[3] / 2), xywh[2],
-                                               xywh[3]));
+              box_list.emplace_back((xywh[0] - xywh[2] / 2),
+                                    (xywh[1] - xywh[3] / 2), xywh[2], xywh[3]);
             }
           }
         }
@@ -326,14 +325,15 @@ inline YoloPostResult post_detpost_plin(
     const std::vector<Tensor> &output_tensors,
     YoloPostResult &last_frame_result, NetInfo &netinfo, float conf,
     float iou_thresh, bool MULTILABEL, bool fpga_nms, int N_CLASS,
-    std::vector<std::vector<std::vector<float>>> &ANCHORS,
-    icraft::xrt::Device device, const std::string &runBackend,
-    std::vector<std::vector<float>> &_norm, std::vector<int> &real_out_channels,
-    std::vector<float> &_stride, int bbox_info_channel) {
+    std::vector<std::vector<std::vector<float>>> &ANCHORS, Device device,
+    const std::string &runBackend, std::vector<std::vector<float>> &_norm,
+    std::vector<int> &real_out_channels, std::vector<int> &_stride,
+    int bbox_info_channel) {
 
   std::vector<int> id_list;
-  std::vector<float> socre_list;
+  std::vector<float> score_list;
   std::vector<cv::Rect2f> box_list;
+  std::vector<int> stride = get_stride(netinfo);
   for (size_t i = 0; i < output_tensors.size(); i++) {
 
     auto host_tensor = output_tensors[i].to(HostDevice::MemRegion());
@@ -342,7 +342,7 @@ inline YoloPostResult post_detpost_plin(
     int obj_num = output_tensors[i].dtype()->shape[2];
     int anchor_length = output_tensors[i].dtype()->shape[3];
 
-    const auto &norm = _norm[i];
+    auto norm = _norm[i];
     auto stride = _stride[i];
     std::vector<float> _anchor_ = {};
     if (output_tensors_bits == 16) {
@@ -351,7 +351,7 @@ inline YoloPostResult post_detpost_plin(
         int base_addr = obj * anchor_length;
         Grid grid = get_grid(output_tensors_bits, tensor_data, base_addr,
                              anchor_length);
-        post_process(id_list, socre_list, box_list, (int16_t *)tensor_data,
+        post_process(id_list, score_list, box_list, (int16_t *)tensor_data,
                      base_addr, grid, real_out_channels, bbox_info_channel,
                      norm, stride, _anchor_, N_CLASS, conf, MULTILABEL);
       }
@@ -361,7 +361,7 @@ inline YoloPostResult post_detpost_plin(
         int base_addr = obj * anchor_length;
         Grid grid = get_grid(output_tensors_bits, tensor_data, base_addr,
                              anchor_length);
-        post_process(id_list, socre_list, box_list, (int8_t *)tensor_data,
+        post_process(id_list, score_list, box_list, (int8_t *)tensor_data,
                      base_addr, grid, real_out_channels, bbox_info_channel,
                      norm, stride, _anchor_, N_CLASS, conf, MULTILABEL);
       }
@@ -369,13 +369,12 @@ inline YoloPostResult post_detpost_plin(
   }
   std::vector<std::tuple<int, float, cv::Rect2f>> nms_res;
   if (fpga_nms) {
-    nms_res = nms_hard(box_list, socre_list, id_list, iou_thresh, device);
+    nms_res = nms_hard(box_list, score_list, id_list, iou_thresh, device);
   } else {
-    nms_res =
-        nms_soft(id_list, socre_list, box_list, iou_thresh); // 后处理 之 NMS
+    nms_res = nms_soft(id_list, score_list, box_list, iou_thresh);
   }
 
-  // // 对前后帧的结果求平均
+  // 对前后帧的结果求平均
   auto id_list_last_frame = std::get<0>(last_frame_result);
   auto score_list_last_frame = std::get<1>(last_frame_result);
   auto box_list_last_frame = std::get<2>(last_frame_result);

@@ -11,9 +11,9 @@ imodel:
   speedmode: false
   compressFtmp: false
   ocm_option: 4
-  dir: ../imodel/mix
+  dir: ../imodel/BY/8
   stage: g
-  run_backend: BY
+  run_backend: buyi
   ip: 192.168.125.181
   save: true
   show: true
@@ -28,7 +28,7 @@ dataset:
   res: ../io/output
 
 param:
-  conf: 0.25
+  conf: 0.1
   iou_thresh: 0.7
   multilabel: false
   number_of_class: 10

@@ -192,13 +192,13 @@ requires-dist = [
     { name = "doclayout-yolo", specifier = "==0.0.4" },
     { name = "httpx", specifier = ">=0.28.1" },
     { name = "huggingface-hub", specifier = ">=0.35.3" },
-    { name = "icraft", path = "C:/Icraft/icraft-3.31.0-cp38-none-win_amd64.whl" },
+    { name = "icraft", specifier = "==3.31.0" },
     { name = "numpy", specifier = ">=1.24.4" },
     { name = "opencv-python", specifier = ">=4.12.0.88" },
     { name = "openpyxl", specifier = ">=3.1.5" },
     { name = "pandas", specifier = "==1.3.5" },
     { name = "pymupdf", specifier = ">=1.24.11" },
-    { name = "pyrtutils", editable = "doclayout_2501/3_deploy/modelzoo/doclayout_yolo/modelzoo_utils" },
+    { name = "pyrtutils", editable = "doclayout_2501/3_deploy/modelzoo_utils" },
     { name = "torch", specifier = "==2.0.1", index = "https://download.pytorch.org/whl/cpu" },
     { name = "torchvision", specifier = "==0.15.2", index = "https://download.pytorch.org/whl/cpu" },
     { name = "triton", marker = "sys_platform == 'linux'", specifier = "==2.0.0", index = "https://download.pytorch.org/whl/cpu" },
@@ -328,9 +328,9 @@ wheels = [
 [[package]]
 name = "icraft"
 version = "3.31.0"
-source = { path = "C:/Icraft/icraft-3.31.0-cp38-none-win_amd64.whl" }
+source = { registry = "https://pypi.tuna.tsinghua.edu.cn/simple" }
 wheels = [
-    { filename = "icraft-3.31.0-cp38-none-win_amd64.whl", hash = "sha256:dccba45ccab243e1ecec72eb89dc6d872dda904bfd779f73837a7112954bfd6e" },
+    { url = "https://pypi.tuna.tsinghua.edu.cn/packages/6e/9d/d1239645980d6f6079bff5d3a6f74a802612eb126c01068366785a22da4c/icraft-3.31.0-cp38-none-win_amd64.whl", hash = "sha256:dccba45ccab243e1ecec72eb89dc6d872dda904bfd779f73837a7112954bfd6e", size = 1901252, upload-time = "2025-08-08T09:11:31.365Z" },
 ]
 
 [[package]]
@@ -603,7 +603,7 @@ wheels = [
 [[package]]
 name = "pyrtutils"
 version = "3.30"
-source = { editable = "doclayout_2501/3_deploy/modelzoo/doclayout_yolo/modelzoo_utils" }
+source = { editable = "doclayout_2501/3_deploy/modelzoo_utils" }
 
 [[package]]
 name = "python-dateutil"
