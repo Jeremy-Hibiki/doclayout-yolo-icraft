@@ -94,8 +94,8 @@ int main(int argc, char *argv[]) {
     imkSession.enableTimeProfile(true);
     auto icoreSession = session.sub(2, - 2);
     icoreSession.enableTimeProfile(true);
-    auto detpostSess = session.sub(-2, -1);
-    detpostSess.enableTimeProfile(true);
+    auto detpostSession = session.sub(-2, -1);
+    detpostSession.enableTimeProfile(true);
 
     // 统计图片数量
     int index = 0;
@@ -128,7 +128,7 @@ int main(int argc, char *argv[]) {
           std::cout << t.dtype()->shape << " ";
       }
       std::cout << std::endl;
-      auto outputs = detpostSess.forward(icoreOutputs);
+      auto outputs = detpostSession.forward(icoreOutputs);
       std::cout << "detpostOutputs size: ";
       for (const auto& t : outputs) {
           std::cout << t.dtype()->shape << " ";
@@ -144,11 +144,11 @@ int main(int argc, char *argv[]) {
 #if defined(__aarch64__) || defined(_M_ARM64)
       device.reset(1);
       std::cout << "Image make time:" << std::endl;
-      calctime(sess_imk);
+      calctime(imkSession);
       std::cout << "Icore time:" << std::endl;
-      calctime(sess_icore);
+      calctime(icoreSession);
       std::cout << "Detpost time:" << std::endl;
-      calctime(sess_detpost);
+      calctime(detpostSession);
 
 #endif
 
